@@ -19,22 +19,25 @@ public class WebClientConfig {
 	WebClient webClient(OAuth2AuthorizedClientManager authorizedClientManager) {
 		ServletOAuth2AuthorizedClientExchangeFilterFunction oauth2Client =
 				new ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager);
+		// @formatter:off
 		return WebClient.builder()
 				.apply(oauth2Client.oauth2Configuration())
 				.build();
+		// @formatter:on
 	}
 
 	@Bean
 	OAuth2AuthorizedClientManager authorizedClientManager(
 			ClientRegistrationRepository clientRegistrationRepository,
 			OAuth2AuthorizedClientRepository authorizedClientRepository) {
-
+		// @formatter:off
 		OAuth2AuthorizedClientProvider authorizedClientProvider =
 				OAuth2AuthorizedClientProviderBuilder.builder()
 						.authorizationCode()
 						.refreshToken()
 						.clientCredentials()
 						.build();
+		// @formatter:on
 		DefaultOAuth2AuthorizedClientManager authorizedClientManager = new DefaultOAuth2AuthorizedClientManager(
 				clientRegistrationRepository, authorizedClientRepository);
 		authorizedClientManager.setAuthorizedClientProvider(authorizedClientProvider);
