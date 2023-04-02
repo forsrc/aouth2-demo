@@ -1,0 +1,49 @@
+
+
+server:
+  port: 8080
+
+logging:
+  level:
+    root: INFO
+    org.springframework.web: INFO
+    org.springframework.security: DEBUG
+    org.springframework.security.oauth2: DEBUG
+#    org.springframework.boot.autoconfigure: DEBUG
+
+spring:
+  thymeleaf:
+    cache: false
+  security:
+    oauth2:
+      client:
+        registration:
+          auth2-client-oidc:
+            provider: spring
+            client-id: auth2-client
+            client-secret: secret
+            authorization-grant-type: authorization_code
+            redirect-uri: "http://127.0.0.1:8080/login/oauth2/code/{registrationId}"
+            scope: openid, profile
+            client-name: auth2-client-oidc
+          auth2-client-authorization-code:
+            provider: spring
+            client-id: auth2-client
+            client-secret: secret
+            authorization-grant-type: authorization_code
+            redirect-uri: "http://127.0.0.1:8080/authorized"
+            scope: message.read,message.write
+            client-name: auth2-client-authorization-code
+          auth2-client-client-credentials:
+            provider: spring
+            client-id: auth2-client
+            client-secret: secret
+            authorization-grant-type: client_credentials
+            scope: message.read,message.write
+            client-name: auth2-client-client-credentials
+        provider:
+          spring:
+            issuer-uri: http://localhost:8888
+
+messages:
+  base-uri: http://127.0.0.1:9999/messages
