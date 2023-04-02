@@ -16,8 +16,10 @@ logging:
 
 my-auth2:
   auth2-server:
-    uri: https://forsrc-auth2-server.duckdns.org # http://localhost:8888
+    uri: http://localhost:8888
+    #uri: https://forsrc-auth2-server.duckdns.org # http://localhost:8888
   auth2-client:
-    uri: https://forsrc-auth2-client.duckdns.org #http://127.0.0.1:8080
+    uri: http://127.0.0.1:8080
+    #uri: https://forsrc-auth2-client.duckdns.org #http://127.0.0.1:8080
     clientId: auth2-client
     redirectUri: ${my-auth2.auth2-client.uri}/login/oauth2/code/auth2-client-oidc, ${my-auth2.auth2-client.uri}/authorized
