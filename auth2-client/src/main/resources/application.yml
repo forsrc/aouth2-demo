@@ -2,13 +2,14 @@
 
 server:
   port: 8080
+  tomcat.internal-proxies: .*
 
 logging:
   level:
     root: INFO
     org.springframework.web: INFO
-    org.springframework.security: DEBUG
-    org.springframework.security.oauth2: DEBUG
+    org.springframework.security: INFO
+    org.springframework.security.oauth2: INFO
 #    org.springframework.boot.autoconfigure: DEBUG
 
 spring:
@@ -23,7 +24,7 @@ spring:
             client-id: auth2-client
             client-secret: secret
             authorization-grant-type: authorization_code
-            redirect-uri: "http://127.0.0.1:8080/login/oauth2/code/{registrationId}"
+            redirect-uri: ${my-auth2.auth2-client.uri}/login/oauth2/code/{registrationId} # "http://127.0.0.1:8080/login/oauth2/code/{registrationId}"
             scope: openid, profile
             client-name: auth2-client-oidc
           auth2-client-authorization-code:
@@ -31,7 +32,7 @@ spring:
             client-id: auth2-client
             client-secret: secret
             authorization-grant-type: authorization_code
-            redirect-uri: "http://127.0.0.1:8080/authorized"
+            redirect-uri: ${my-auth2.auth2-client.uri}/authorized # "http://127.0.0.1:8080/authorized"
             scope: message.read,message.write
             client-name: auth2-client-authorization-code
           auth2-client-client-credentials:
@@ -43,7 +44,18 @@ spring:
             client-name: auth2-client-client-credentials
         provider:
           spring:
-            issuer-uri: http://localhost:8888
+            issuer-uri: ${my-auth2.auth2-server.uri} # http://localhost:8888
 
-messages:
-  base-uri: http://127.0.0.1:9999/messages
+
+my-auth2:
+  auth2-server:
+    uri: https://forsrc-auth2-server.duckdns.org #http://localhost:8888
+  auth2-resource-server: 
+    uri: https://forsrc-auth2-resource-server.duckdns.org #http://127.0.0.1:9999
+    messages: ${my-auth2.auth2-resource-server.uri}/messages
+  auth2-client:
+    uri: https://forsrc-auth2-client.duckdns.org #http://127.0.0.1:8080
+    loginPage: /oauth2/authorization/auth2-client-oidc
+
+
+  
