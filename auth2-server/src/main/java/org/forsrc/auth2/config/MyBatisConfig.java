@@ -21,7 +21,7 @@ public class MyBatisConfig {
 		sqlSessionFactoryBean.setDataSource(this.dataSource);
 		PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 		sqlSessionFactoryBean
-				.setMapperLocations(resolver.getResources("classpath*:com/forsrc/**/dao/mapper/*Mapper.xml"));
+				.setMapperLocations(resolver.getResources("classpath*:org/forsrc/**/dao/mapper/*Mapper.xml"));
 		return sqlSessionFactoryBean.getObject();
 	}
 }
