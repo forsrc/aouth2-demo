@@ -37,7 +37,7 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 
-@Configuration(proxyBeanMethods = false)
+@Configuration
 public class AuthorizationServerConfig {
 
 	@Value("${my-auth2.auth2-client.uri}")
@@ -64,7 +64,7 @@ public class AuthorizationServerConfig {
 	public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
 		OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
 		// Enable OpenID Connect 1.0
-		http.getConfigurer(OAuth2AuthorizationServerConfigurer.class).oidc(Customizer.withDefaults()); 
+		http.getConfigurer(OAuth2AuthorizationServerConfigurer.class).oidc(Customizer.withDefaults());
 
 		// @formatter:off
 		http
@@ -72,6 +72,7 @@ public class AuthorizationServerConfig {
 				exceptions.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"))
 			)
 			.oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt);
+		
 		// @formatter:on
 		return http.build();
 	}
@@ -95,10 +96,16 @@ public class AuthorizationServerConfig {
 				.clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
 				.build();
 
+
 		// Save registered client in db as if in-memory
 		JdbcRegisteredClientRepository registeredClientRepository = new JdbcRegisteredClientRepository(jdbcTemplate);
-		registeredClientRepository.save(registeredClient);
-
+		RegisteredClient client = registeredClientRepository.findByClientId(auth2ClientClientId);
+		System.out.println(client);
+		if (client == null) {
+			registeredClientRepository.save(registeredClient);
+			System.out.println(registeredClient);
+		}
+		
 		return registeredClientRepository;
 	}
 	// @formatter:on
@@ -127,18 +134,18 @@ public class AuthorizationServerConfig {
 		return OAuth2AuthorizationServerConfiguration.jwtDecoder(jwkSource);
 	}
 
-	@Bean
-	public EmbeddedDatabase embeddedDatabase() {
-		// @formatter:off
-		return new EmbeddedDatabaseBuilder()
-				.generateUniqueName(true)
-				.setType(EmbeddedDatabaseType.H2)
-				.setScriptEncoding("UTF-8")
-				.addScript("org/springframework/security/oauth2/server/authorization/oauth2-authorization-schema.sql")
-				.addScript("org/springframework/security/oauth2/server/authorization/oauth2-authorization-consent-schema.sql")
-				.addScript("org/springframework/security/oauth2/server/authorization/client/oauth2-registered-client-schema.sql")
-				.build();
-		// @formatter:on
-	}
+//	@Bean
+//	public EmbeddedDatabase embeddedDatabase() {
+//		// @formatter:off
+//		return new EmbeddedDatabaseBuilder()
+//				.generateUniqueName(true)
+//				.setType(EmbeddedDatabaseType.H2)
+//				.setScriptEncoding("UTF-8")
+//				.addScript("org/springframework/security/oauth2/server/authorization/oauth2-authorization-schema.sql")
+//				.addScript("org/springframework/security/oauth2/server/authorization/oauth2-authorization-consent-schema.sql")
+//				.addScript("org/springframework/security/oauth2/server/authorization/client/oauth2-registered-client-schema.sql")
+//				.build();
+//		// @formatter:on
+//	}
 
 }
