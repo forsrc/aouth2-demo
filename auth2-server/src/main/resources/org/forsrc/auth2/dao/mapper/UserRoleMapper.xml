@@ -19,7 +19,7 @@
             LEFT JOIN t_role R
             ON U.id = UR.user_id AND R.id = UR.role_id
         WHERE
-            R.id = #{userId}
+            U.id = #{userId}
         ;
     </select>
 </mapper>
