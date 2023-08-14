@@ -53,7 +53,10 @@ public class DefaultSecurityConfig {
 	SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
 		http
 			.authorizeHttpRequests(authorize ->
-				authorize.anyRequest().authenticated()
+				{
+					authorize.requestMatchers("/actuator/**").permitAll();
+					authorize.anyRequest().authenticated();
+				}
 			)
 			.formLogin(withDefaults())
 			.logout().permitAll()

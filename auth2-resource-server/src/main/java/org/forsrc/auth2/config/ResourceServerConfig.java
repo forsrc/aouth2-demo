@@ -14,6 +14,9 @@ public class ResourceServerConfig {
 	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http
+			.authorizeHttpRequests(authorize ->
+				authorize.requestMatchers("/actuator/**").permitAll()
+			)
 			.securityMatcher("/messages/**")
 				.authorizeHttpRequests()
 					.requestMatchers("/messages/**").hasAuthority("SCOPE_message.read")
