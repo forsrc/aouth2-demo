@@ -1,23 +1,4 @@
 
-server:
-  port: 9999
-
-logging:
-  level:
-    root: INFO
-    org.springframework.web: INFO
-    org.springframework.security: INFO
-    org.springframework.security.oauth2: INFO
-#    org.springframework.boot.autoconfigure: DEBUG
-
 spring:
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: ${my-auth2.auth2-server.uri} # http://localhost:8888
-
-my-auth2:
-  auth2-server:
-    uri: http://localhost:8888
-    #uri: https://forsrc-auth2-server.duckdns.org # http://localhost:8888
+  profiles:
+    active: local # duckdns

@@ -1,0 +1,19 @@
+
+
+
+my-auth2:
+  auth2-server:
+    uri: http://localhost:8888
+    #uri: https://forsrc-auth2-server.duckdns.org #http://localhost:8888
+  auth2-resource-server:
+    uri: http://127.0.0.1:9999 
+    #uri: https://forsrc-auth2-resource-server.duckdns.org #http://127.0.0.1:9999
+    messages: ${my-auth2.auth2-resource-server.uri}/messages
+  auth2-client:
+    uri: http://127.0.0.1:8080
+    #uri: https://forsrc-auth2-client.duckdns.org #http://127.0.0.1:8080
+    loginPage: /oauth2/authorization/auth2-client-oidc
+    logoutUrl: ${my-auth2.auth2-server.uri}/oauth/logout?referer=${my-auth2.auth2-client.uri}
+
+
+  

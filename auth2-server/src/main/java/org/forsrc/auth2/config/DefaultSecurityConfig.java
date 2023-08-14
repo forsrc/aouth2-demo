@@ -2,6 +2,7 @@ package org.forsrc.auth2.config;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -16,14 +17,23 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @EnableWebSecurity
 @Configuration
@@ -51,22 +61,59 @@ public class DefaultSecurityConfig {
 	// @formatter:off
 	@Bean
 	SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
-		http
-			.authorizeHttpRequests(authorize ->
-				{
-					authorize.requestMatchers("/actuator/**").permitAll();
-					authorize.anyRequest().authenticated();
-				}
-			)
-			.formLogin(withDefaults())
-			.logout().permitAll()
-			.and()
-			.authenticationProvider(authenticationProvider())
-			.userDetailsService(userDetailsService())
+        http
+                .authorizeHttpRequests(authorize -> {
+                    	authorize.requestMatchers("/actuator/**", "/oauth/logout").permitAll();
+                    	authorize.anyRequest().authenticated();
+                })
+                .formLogin(withDefaults())
+                .logout(logout -> {
+                	logout.clearAuthentication(true)
+            		.invalidateHttpSession(true)
+            		.deleteCookies("JSESSIONID")
+            		.logoutSuccessUrl("/")
+            		.logoutUrl("/logout**")
+            		.logoutSuccessHandler(logoutSuccessHandler())
+            		.permitAll();
+                })
+                .authenticationProvider(authenticationProvider())
+                .userDetailsService(userDetailsService())
 			;
 		return http.build();
 	}
 	// @formatter:on
+	
+	private LogoutSuccessHandler logoutSuccessHandler() {
+		return new LogoutSuccessHandler() {
+
+			@Override
+			public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response,
+					Authentication authentication) throws IOException, ServletException {
+				final Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+				if (auth == null) {
+					request.getRequestDispatcher("/?logout").forward(request, response);
+					return;
+				}
+
+				new SecurityContextLogoutHandler().logout(request, response, auth);
+				auth.setAuthenticated(false);
+				SecurityContextHolder.clearContext();
+				for (Cookie cookie : request.getCookies()) {
+					String cookieName = cookie.getName();
+					Cookie cookieToDelete = new Cookie(cookieName, null);
+					cookieToDelete.setPath(request.getContextPath() + "/");
+					cookieToDelete.setMaxAge(0);
+					response.addCookie(cookieToDelete);
+				}
+				SecurityContextHolder.getContext().setAuthentication(null);
+				request.getRequestDispatcher("/?logout").forward(request, response);
+
+
+			}
+
+		};
+	}
 
 	// @formatter:off
 //	@Bean

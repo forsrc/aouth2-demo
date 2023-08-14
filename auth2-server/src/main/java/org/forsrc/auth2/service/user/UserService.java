@@ -1,6 +1,7 @@
 package org.forsrc.auth2.service.user;
 
 import java.util.List;
+
 import org.forsrc.auth2.dao.UserDao;
 import org.forsrc.auth2.dao.mapper.UserRoleMapper;
 import org.forsrc.auth2.entity.User;
