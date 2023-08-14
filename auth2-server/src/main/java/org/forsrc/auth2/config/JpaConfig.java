@@ -7,6 +7,8 @@ import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.JpaVendorAdapter;
@@ -20,6 +22,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableJpaRepositories(entityManagerFactoryRef = "entityManagerFactory", transactionManagerRef = "transactionManager", basePackages = {
 		"org.forsrc.auth2.*" })
 @EntityScan({ "org.forsrc.auth2.entity" })
+@Order(Ordered.HIGHEST_PRECEDENCE + 10)
 public class JpaConfig {
 	@Autowired
 	private JpaProperties jpaProperties;
@@ -33,8 +36,10 @@ public class JpaConfig {
 	@Bean(name = { "entityManagerFactory" })
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
 		LocalContainerEntityManagerFactoryBean entityManagerFactory = this.builder.dataSource(this.dataSource)
-				.packages(new String[] { "org.forsrc.auth2.entity" }).persistenceUnit("persistenceUnit-oauth2-server")
-				.properties(this.jpaProperties.getProperties()).build();
+				.packages(new String[] { "org.forsrc.auth2.entity" })
+				.persistenceUnit("persistenceUnit-oauth2-server")
+				.properties(this.jpaProperties.getProperties())
+				.build();
 		entityManagerFactory.setJpaVendorAdapter((JpaVendorAdapter) new HibernateJpaVendorAdapter());
 		return entityManagerFactory;
 	}
@@ -46,4 +51,6 @@ public class JpaConfig {
 		transactionManager.setDataSource(this.dataSource);
 		return (PlatformTransactionManager) transactionManager;
 	}
+
+
 }
