@@ -3,6 +3,7 @@ package org.forsrc.auth2.config;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.sql.init.dependency.DependsOnDatabaseInitialization;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
@@ -14,6 +15,7 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
@@ -37,7 +39,7 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 
-@Configuration(proxyBeanMethods = false)
+@Configuration
 public class AuthorizationServerConfig {
 
 	@Value("${my-auth2.auth2-client.uri}")
@@ -60,11 +62,11 @@ public class AuthorizationServerConfig {
 	}
 
 	@Bean
-	@Order(Ordered.HIGHEST_PRECEDENCE)
+	@Order(Ordered.HIGHEST_PRECEDENCE + 100)
 	public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
 		OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
 		// Enable OpenID Connect 1.0
-		http.getConfigurer(OAuth2AuthorizationServerConfigurer.class).oidc(Customizer.withDefaults()); 
+		http.getConfigurer(OAuth2AuthorizationServerConfigurer.class).oidc(Customizer.withDefaults());
 
 		// @formatter:off
 		http
@@ -72,12 +74,14 @@ public class AuthorizationServerConfig {
 				exceptions.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"))
 			)
 			.oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt);
+		
 		// @formatter:on
 		return http.build();
 	}
 
 	// @formatter:off
 	@Bean
+	@DependsOnDatabaseInitialization
 	public RegisteredClientRepository registeredClientRepository(JdbcTemplate jdbcTemplate) {
 		RegisteredClient registeredClient = RegisteredClient.withId(UUID.randomUUID().toString())
 				.clientId(auth2ClientClientId)
@@ -95,10 +99,14 @@ public class AuthorizationServerConfig {
 				.clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
 				.build();
 
-		// Save registered client in db as if in-memory
 		JdbcRegisteredClientRepository registeredClientRepository = new JdbcRegisteredClientRepository(jdbcTemplate);
-		registeredClientRepository.save(registeredClient);
-
+		// RegisteredClient client = registeredClientRepository.findByClientId(auth2ClientClientId);
+		// System.out.println(client);
+		// if (client == null) {
+		// 	registeredClientRepository.save(registeredClient);
+		// 	System.out.println(registeredClient);
+		// }
+		
 		return registeredClientRepository;
 	}
 	// @formatter:on
@@ -127,18 +135,17 @@ public class AuthorizationServerConfig {
 		return OAuth2AuthorizationServerConfiguration.jwtDecoder(jwkSource);
 	}
 
-	@Bean
-	public EmbeddedDatabase embeddedDatabase() {
-		// @formatter:off
-		return new EmbeddedDatabaseBuilder()
-				.generateUniqueName(true)
-				.setType(EmbeddedDatabaseType.H2)
-				.setScriptEncoding("UTF-8")
-				.addScript("org/springframework/security/oauth2/server/authorization/oauth2-authorization-schema.sql")
-				.addScript("org/springframework/security/oauth2/server/authorization/oauth2-authorization-consent-schema.sql")
-				.addScript("org/springframework/security/oauth2/server/authorization/client/oauth2-registered-client-schema.sql")
-				.build();
-		// @formatter:on
-	}
-
+	// @Bean
+	// public EmbeddedDatabase embeddedDatabase() {
+	// 	// @formatter:off
+	// 	return new EmbeddedDatabaseBuilder()
+	// 			.generateUniqueName(true)
+	// 			.setType(EmbeddedDatabaseType.H2)
+	// 			.setScriptEncoding("UTF-8")
+	// 			.addScript("org/springframework/security/oauth2/server/authorization/oauth2-authorization-schema.sql")
+	// 			.addScript("org/springframework/security/oauth2/server/authorization/oauth2-authorization-consent-schema.sql")
+	// 			.addScript("org/springframework/security/oauth2/server/authorization/client/oauth2-registered-client-schema.sql")
+	// 			.build();
+	// 	// @formatter:on
+	// }
 }

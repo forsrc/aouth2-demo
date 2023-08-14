@@ -27,7 +27,10 @@ public class SecurityConfig {
 	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http
 			.authorizeHttpRequests(authorize ->
-				authorize.anyRequest().authenticated()
+				{
+					authorize.requestMatchers("/actuator/**").permitAll();
+					authorize.anyRequest().authenticated();
+				}
 			)
 			.oauth2Login(oauth2Login ->
 				oauth2Login.loginPage(loginPage))
