@@ -45,7 +45,7 @@ public class SecurityConfig {
 		http
 			.authorizeHttpRequests(authorize ->
 				{
-					authorize.requestMatchers("/actuator/**", "/", "/index").permitAll();
+					authorize.requestMatchers("/actuator/**", "/", "/index", "/logout").permitAll();
 					authorize.anyRequest().authenticated();
 				}
 			)
@@ -76,7 +76,7 @@ public class SecurityConfig {
 				final Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
 
-				if (auth == null) {
+				if (auth == null || "anonymousUser".equals(auth.getPrincipal())) {
 					request.getRequestDispatcher("/?logout").forward(request, response);
 					return;
 				}
@@ -92,7 +92,7 @@ public class SecurityConfig {
 					response.addCookie(cookieToDelete);
 				}
 				SecurityContextHolder.getContext().setAuthentication(null);
-				request.getRequestDispatcher(logoutUrl).forward(request, response);
+				response.sendRedirect(logoutUrl);
 			}
 
 		};
