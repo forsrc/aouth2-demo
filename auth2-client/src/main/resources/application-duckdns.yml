@@ -10,6 +10,7 @@ my-auth2:
   auth2-client:
     uri: https://forsrc-auth2-client.duckdns.org #http://127.0.0.1:8080
     loginPage: /oauth2/authorization/auth2-client-oidc
+    logoutUrl: ${my-auth2.auth2-server.uri}/oauth/logout?referer=${my-auth2.auth2-client.uri}
 
 
   

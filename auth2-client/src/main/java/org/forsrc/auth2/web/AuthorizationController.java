@@ -40,7 +40,7 @@ public class AuthorizationController {
 		// @formatter:on
 		model.addAttribute("messages", messages);
 
-		return "index";
+		return "demo";
 	}
 
 	// '/authorized' is the registered 'redirect_uri' for authorization_code
@@ -53,7 +53,7 @@ public class AuthorizationController {
 							request.getParameter(OAuth2ParameterNames.ERROR_URI)));
 		}
 
-		return "index";
+		return "demo";
 	}
 
 	@GetMapping(value = "/authorize", params = "grant_type=client_credentials")
@@ -69,6 +69,6 @@ public class AuthorizationController {
 		// @formatter:off
 		model.addAttribute("messages", messages);
 
-		return "index";
+		return "demo";
 	}
 }
