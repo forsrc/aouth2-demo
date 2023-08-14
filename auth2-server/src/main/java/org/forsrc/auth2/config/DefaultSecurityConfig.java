@@ -51,18 +51,20 @@ public class DefaultSecurityConfig {
 	// @formatter:off
 	@Bean
 	SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
-		http
-			.authorizeHttpRequests(authorize ->
-				{
-					authorize.requestMatchers("/actuator/**").permitAll();
-					authorize.anyRequest().authenticated();
-				}
-			)
-			.formLogin(withDefaults())
-			.logout().permitAll()
-			.and()
-			.authenticationProvider(authenticationProvider())
-			.userDetailsService(userDetailsService())
+        http
+                .authorizeHttpRequests(authorize -> {
+                    	authorize.requestMatchers("/actuator/**").permitAll();
+                    	authorize.anyRequest().authenticated();
+                })
+                .formLogin(withDefaults())
+                .logout(logout -> {
+                	logout.permitAll();
+                	logout.clearAuthentication(true);
+                	logout.invalidateHttpSession(true);
+                	logout.deleteCookies("JSESSIONID");
+                })
+                .authenticationProvider(authenticationProvider())
+                .userDetailsService(userDetailsService())
 			;
 		return http.build();
 	}

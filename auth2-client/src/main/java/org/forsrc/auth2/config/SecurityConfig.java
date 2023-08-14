@@ -32,7 +32,13 @@ public class SecurityConfig {
 					authorize.anyRequest().authenticated();
 				}
 			)
-			.oauth2Login(oauth2Login ->
+			.logout(logout -> {
+				logout.permitAll();
+            	logout.clearAuthentication(true);
+            	logout.invalidateHttpSession(true);
+            	logout.deleteCookies("JSESSIONID");
+			})
+			.oauth2Login(oauth2Login -> 
 				oauth2Login.loginPage(loginPage))
 			.oauth2Client(withDefaults());
 		return http.build();

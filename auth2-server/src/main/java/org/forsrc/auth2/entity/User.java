@@ -1,7 +1,11 @@
 package org.forsrc.auth2.entity;
 
+import java.io.Serializable;
+import java.util.Date;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -15,8 +19,6 @@ import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.persistence.Version;
-import java.io.Serializable;
-import java.util.Date;
 
 @Entity
 @Table(name = "t_user", indexes = { @Index(name = "i_user_username", columnList = "username") }, uniqueConstraints = {
